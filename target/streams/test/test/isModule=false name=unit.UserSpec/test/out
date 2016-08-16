@@ -1,0 +1,15 @@
+[0m[[0minfo[0m] [0m[32mUserSpec:[0m[0m
+[0m[[0minfo[0m] [0m[32mA[0m[0m
+[0m[[0minfo[0m] [0m[31munit.UserSpec *** ABORTED ***[0m[0m
+[0m[[0minfo[0m] [0m[31m  java.lang.IncompatibleClassChangeError: Found interface org.scalacheck.Test$Parameters, but class was expected[0m[0m
+[0m[[0minfo[0m] [0m[31m  at org.scalatest.prop.Configuration$class.getParams(Configuration.scala:444)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at unit.UserSpec.getParams(UserSpec.scala:6)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at org.scalatest.prop.GeneratorDrivenPropertyChecks$class.forAll(GeneratorDrivenPropertyChecks.scala:850)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at unit.UserSpec.forAll(UserSpec.scala:6)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at unit.UserSpec$$anonfun$1$$anonfun$apply$mcV$sp$1.apply$mcV$sp(UserSpec.scala:10)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at unit.UserSpec$$anonfun$1$$anonfun$apply$mcV$sp$1.apply(UserSpec.scala:10)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at unit.UserSpec$$anonfun$1$$anonfun$apply$mcV$sp$1.apply(UserSpec.scala:10)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at org.scalatest.OutcomeOf$class.outcomeOf(OutcomeOf.scala:85)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at org.scalatest.OutcomeOf$.outcomeOf(OutcomeOf.scala:104)[0m[0m
+[0m[[0minfo[0m] [0m[31m  at org.scalatest.Transformer.apply(Transformer.scala:22)[0m[0m
+[0m[[0minfo[0m] [0m[31m  ...[0m[0m
