@@ -9,7 +9,7 @@ import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
 import utils.GeneratorHelpers
 
 import collection.JavaConversions._
-import scala.util.Try
+import scala.util.{Failure, Success, Try}
 
 class PokeStoreSpec
   extends WordSpecLike
@@ -53,10 +53,18 @@ class SinglePlayerPokeStoreSpec(player: Player)
     sut
   }
 
+  def arbitraryTransfer(state: State): Gen[Transfer] = {
+    Gen.oneOf(
+      Gen.oneOf(state).map(Transfer),
+      arbitrary[Pokemon].filter(p => !state.contains(p)).map(Transfer)
+    )
+  }
+
   override def genCommand(state: State): Gen[Command] = {
     Gen.oneOf(
       Gen.const(List),
-      arbitrary[Pokemon].map(Store)
+      arbitrary[Pokemon].map(Store),
+      arbitraryTransfer(state)
     )
   }
 
@@ -90,5 +98,20 @@ class SinglePlayerPokeStoreSpec(player: Player)
     override def run(sut: PokeStore): Result = sut.storePokemon(player, pokemon)
 
     override def nextState(state: List[Pokemon]): List[Pokemon] = pokemon :: state
+  }
+
+  case class Transfer(pokemon: Pokemon) extends Command {
+    override type Result = Unit
+
+    override def preCondition(state: List[Pokemon]): Boolean = true
+
+    override def postCondition(state: List[Pokemon], result: Try[Result]): Prop = result match {
+      case Success(_) => state.contains(pokemon)
+      case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.contains(pokemon)
+    }
+
+    override def run(sut: PokeStore): Result = sut.transferPokemon(player, pokemon)
+
+    override def nextState(state: List[Pokemon]): List[Pokemon] = state.filterNot(_ == pokemon)
   }
 }

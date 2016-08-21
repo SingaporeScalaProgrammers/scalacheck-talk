@@ -18,4 +18,12 @@ public class PokeStore {
     public List<Pokemon> listPokemon(Player player) {
         return storage;
     }
+
+    public void transferPokemon(Player player, Pokemon pokemon) {
+        if (!storage.contains(pokemon)) {
+            throw new IllegalArgumentException();
+        } else {
+            storage.remove(pokemon);
+        }
+    }
 }
