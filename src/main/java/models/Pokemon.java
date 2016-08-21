@@ -15,6 +15,18 @@ public class Pokemon {
         this.type = type;
     }
 
+    public int getId() {
+        return id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getType() {
+        return type;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -28,5 +40,10 @@ public class Pokemon {
     @Override
     public int hashCode() {
         return Objects.hash(id, name, type);
+    }
+
+    @Override
+    public String toString(){
+        return "Pokemon("+id+","+name+","+type+")";
     }
 }

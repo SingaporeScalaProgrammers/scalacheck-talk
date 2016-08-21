@@ -23,7 +23,7 @@ class PokeStoreSpec
   "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
-      check(new SinglePlayerPokeStoreSpec(testPlayer).property())
+      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 1))
     }
 
   }
