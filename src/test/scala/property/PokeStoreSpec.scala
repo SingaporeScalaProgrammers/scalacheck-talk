@@ -1,5 +1,7 @@
 package property
 
+import java.util.Date
+
 import models.{PokeStore, Pokemon, Player}
 import org.scalacheck.{Prop, Gen}
 import org.scalacheck.Arbitrary._
@@ -14,13 +16,16 @@ import scala.util.{Failure, Success, Try}
 class PokeStoreSpec
   extends WordSpecLike
     with MustMatchers
-    with Checkers {
+    with Checkers
+    with GeneratorHelpers
+    with GeneratorDrivenPropertyChecks {
 
   "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
       check(new SinglePlayerPokeStoreSpec(testPlayer).property())
     }
+
   }
 
 }
@@ -29,7 +34,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
   extends Commands
     with GeneratorHelpers {
 
-  override type State = List[Pokemon]
+  override type State = List[(Pokemon, Date)]
 
   override def destroySut(sut: Sut): Unit = sut.clearAll()
 
@@ -42,20 +47,32 @@ class SinglePlayerPokeStoreSpec(player: Player)
   }
 
   override def genInitialState: Gen[State] = {
-    Gen.listOf(arbitrary[Pokemon])
+    Gen.listOf(
+      for {
+        poke <- arbitrary[Pokemon]
+        time <- arbitrary[Date]
+      } yield (poke, time)
+    )
   }
 
   override def newSut(state: State): Sut = {
     val sut = new PokeStore()
 
-    state.foreach(sut.storePokemon(player, _))
+    state.foreach(entry => sut.storePokemon(player, entry._1, entry._2))
 
     sut
   }
 
+  def arbitraryStore = {
+    for {
+      poke <- arbitrary[Pokemon]
+      time <- arbitrary[Date]
+    } yield Store(poke, time)
+  }
+
   def arbitraryTransfer(state: State): Gen[Transfer] = {
     Gen.oneOf(
-      Gen.oneOf(state).map(Transfer),
+      Gen.oneOf(state).map(e => Transfer(e._1)),
       arbitrary[Pokemon].filter(p => !state.contains(p)).map(Transfer)
     )
   }
@@ -63,8 +80,9 @@ class SinglePlayerPokeStoreSpec(player: Player)
   override def genCommand(state: State): Gen[Command] = {
     Gen.oneOf(
       Gen.const(List),
-      arbitrary[Pokemon].map(Store),
-      arbitraryTransfer(state)
+      arbitraryStore,
+      arbitraryTransfer(state),
+      Gen.const(CatchRate)
     )
   }
 
@@ -73,7 +91,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
   case object List extends Command {
 
-    override def preCondition(state: List[Pokemon]): Boolean = true
+    override def preCondition(state: State): Boolean = true
 
     override def run(sut: PokeStore): Result = sut.listPokemon(player).toList
 
@@ -81,37 +99,49 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
     override type Result = List[Pokemon]
 
-    override def postCondition(state: List[Pokemon], result: Try[Result]): Prop =
+    override def postCondition(state: State, result: Try[Result]): Prop =
       result.isSuccess && (
         result.get.size == state.size &&
-        result.get.forall(state.contains)
+        result.get.forall(p => state.exists(_._1 == p))
         )
   }
 
-  case class Store(pokemon: Pokemon) extends Command {
+  case class Store(pokemon: Pokemon, time: Date) extends Command {
     override type Result = Unit
 
-    override def preCondition(state: List[Pokemon]): Boolean = true
+    override def preCondition(state: State): Boolean = true
 
-    override def postCondition(state: List[Pokemon], result: Try[Result]): Prop = result.isSuccess
+    override def postCondition(state: State, result: Try[Result]): Prop = result.isSuccess
 
-    override def run(sut: PokeStore): Result = sut.storePokemon(player, pokemon)
+    override def run(sut: PokeStore): Result = sut.storePokemon(player, pokemon, time)
 
-    override def nextState(state: List[Pokemon]): List[Pokemon] = pokemon :: state
+    override def nextState(state: State): State = (pokemon, time) :: state
   }
 
   case class Transfer(pokemon: Pokemon) extends Command {
     override type Result = Unit
 
-    override def preCondition(state: List[Pokemon]): Boolean = true
+    override def preCondition(state: State): Boolean = true
 
-    override def postCondition(state: List[Pokemon], result: Try[Result]): Prop = result match {
-      case Success(_) => state.contains(pokemon)
-      case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.contains(pokemon)
+    override def postCondition(state:State, result: Try[Result]): Prop = result match {
+      case Success(_) => state.exists(_._1 == pokemon)
+      case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.exists(_._1 == pokemon)
     }
 
     override def run(sut: PokeStore): Result = sut.transferPokemon(player, pokemon)
 
-    override def nextState(state: List[Pokemon]): List[Pokemon] = state.filterNot(_ == pokemon)
+    override def nextState(state: State): State = state.filterNot(_._1 == pokemon)
+  }
+
+  case object CatchRate extends Command {
+    override type Result = Double
+
+    override def preCondition(state: State): Boolean = true
+
+    override def postCondition(state: State, result: Try[Result]): Prop = result.isSuccess
+
+    override def run(sut: PokeStore): Result = sut.catchRate(player)
+
+    override def nextState(state: State): State = state
   }
 }
