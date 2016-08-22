@@ -1,6 +1,7 @@
 package property
 
 import models.Pokemon
+import org.scalacheck.Arbitrary
 import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import org.scalatest.WordSpec
@@ -9,21 +10,16 @@ import utils.GeneratorHelpers
 
 class PokemonSpec extends WordSpec with GeneratorDrivenPropertyChecks with GeneratorHelpers {
 
-  //TODO how to make these generic
-  def sameOrDifferentInt = for {
-    item <- arbitrary[Int]
-    pair <- Gen.oneOf((item, item), (item, arbitrary[Int].sample.get))
-  } yield pair
 
-  def sameOrDifferentString = for {
-    item <- arbitrary[String]
-    pair <- Gen.oneOf((item, item), (item, arbitrary[String].sample.get))
+  def sameOrDifferent[T](implicit ev: Arbitrary[T]) = for {
+    item <- ev.arbitrary
+    pair <- Gen.oneOf((item, item), (item, ev.arbitrary.sample.get))
   } yield pair
 
   lazy val sameOrDifferentPokemon = for {
-    ids <- sameOrDifferentInt
-    names <- sameOrDifferentString
-    types <- sameOrDifferentString
+    ids <- sameOrDifferent[Int]
+    names <- sameOrDifferent[String]
+    types <- sameOrDifferent[String]
   } yield {
     (new Pokemon(ids._1, names._1, types._1), new Pokemon(ids._2, names._2, types._2))
   }

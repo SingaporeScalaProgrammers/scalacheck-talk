@@ -47,18 +47,19 @@ class SinglePlayerPokeStoreSpec(player: Player)
   }
 
   override def genInitialState: Gen[State] = {
-    Gen.listOf(
+    Gen.const(List.empty)
+    /*Gen.listOf(
       for {
         poke <- arbitrary[Pokemon]
         time <- arbitrary[Date]
       } yield (poke, time)
-    )
+    )*/
   }
 
   override def newSut(state: State): Sut = {
     val sut = new PokeStore()
 
-    state.foreach(entry => sut.storePokemon(player, entry._1, entry._2))
+    //state.foreach(entry => sut.storePokemon(player, entry._1, entry._2))
 
     sut
   }
@@ -79,7 +80,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
   override def genCommand(state: State): Gen[Command] = {
     Gen.oneOf(
-      Gen.const(List),
+      Gen.const(ListPokemon),
       arbitraryStore,
       arbitraryTransfer(state),
       Gen.const(CatchRate)
@@ -89,7 +90,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
   override type Sut = PokeStore
 
 
-  case object List extends Command {
+  case object ListPokemon extends Command {
 
     override def preCondition(state: State): Boolean = true
 
