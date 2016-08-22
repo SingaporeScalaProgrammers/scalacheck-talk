@@ -2,11 +2,11 @@ package property
 
 import java.util.Date
 
-import models.{PokeStore, Pokemon, Player}
-import org.scalacheck.{Prop, Gen}
+import models.{CatchEntry, Player, PokeStore, Pokemon}
+import org.scalacheck.{Gen, Prop}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.commands.Commands
-import org.scalatest.{WordSpecLike, MustMatchers}
+import org.scalatest.{MustMatchers, WordSpecLike}
 import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
 import utils.GeneratorHelpers
 
@@ -21,6 +21,19 @@ class PokeStoreSpec
     with GeneratorDrivenPropertyChecks {
 
   "PokeStore" should {
+    //1st edge case the empty list
+    "catch rate should be > 0 if list is non empty" in {
+      forAll(Gen.listOfN(2,catches)){
+        (catches : List[CatchEntry]) => {
+          val store = new PokeStore()
+          if(catches.isEmpty || catches.size == 1) { //fixes for bug #1 and bug#2
+            assert(store.catchRate(catches) == 0.0)
+          }
+          else assert(store.catchRate(catches) > 0) //bug #3 is that a catch rate of 0.0 is returned when you catch 2 pokemon on the same day
+        }
+      }
+
+    }
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
       check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 1))
@@ -81,8 +94,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
     Gen.oneOf(
       Gen.const(List),
       arbitraryStore,
-      arbitraryTransfer(state),
-      Gen.const(CatchRate)
+      arbitraryTransfer(state)
     )
   }
 
@@ -133,15 +145,4 @@ class SinglePlayerPokeStoreSpec(player: Player)
     override def nextState(state: State): State = state.filterNot(_._1 == pokemon)
   }
 
-  case object CatchRate extends Command {
-    override type Result = Double
-
-    override def preCondition(state: State): Boolean = true
-
-    override def postCondition(state: State, result: Try[Result]): Prop = result.isSuccess
-
-    override def run(sut: PokeStore): Result = sut.catchRate(player)
-
-    override def nextState(state: State): State = state
-  }
 }
