@@ -61,20 +61,10 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
   override def genInitialState: Gen[State] = {
     Gen.const(List.empty)
-    /*Gen.listOf(
-      for {
-        poke <- arbitrary[Pokemon]
-        time <- arbitrary[Date]
-      } yield (poke, time)
-    )*/
   }
 
   override def newSut(state: State): Sut = {
-    val sut = new PokeStore()
-
-    //state.foreach(entry => sut.storePokemon(player, entry._1, entry._2))
-
-    sut
+    new PokeStore()
   }
 
   def arbitraryStore = {
