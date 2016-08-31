@@ -1,7 +1,9 @@
 package utils
 
-import models.Pokemon
-import org.scalacheck.Arbitrary
+import java.util.Date
+
+import models.{CatchEntry, Pokemon}
+import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
 
 
@@ -17,5 +19,10 @@ trait GeneratorHelpers {
   implicit def arbPokemon = Arbitrary(
     pokemon
   )
+
+  val catches = for{
+    time <- Gen.posNum[Long]
+    pokemon <- pokemon
+  } yield new CatchEntry(pokemon,new Date(time))
 
 }
