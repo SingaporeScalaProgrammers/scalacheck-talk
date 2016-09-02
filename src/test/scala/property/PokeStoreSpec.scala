@@ -36,7 +36,7 @@ class SinglePlayerPokeStoreSpec()
 
   override type State = List[Pokemon]
 
-  override def destroySut(sut: Sut): Unit = () //sut.clearAll()
+  override def destroySut(sut: Sut): Unit = ()
 
   override def initialPreCondition(state: State): Boolean = true
 
