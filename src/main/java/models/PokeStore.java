@@ -5,23 +5,17 @@ import java.util.stream.Collectors;
 
 public class PokeStore {
 
-
-
     private List<CatchEntry> storage = new ArrayList<>();
-
-    public synchronized void clearAll() {
-        storage.clear();
-    }
 
     public synchronized void storePokemon(Player player, Pokemon pokemon, Date catchTime) {
         storage.add(new CatchEntry(pokemon, catchTime));
     }
 
-    public List<Pokemon> listPokemon(Player player) {
+    public synchronized List<Pokemon> listPokemon(Player player) {
         return storage.stream().map(f -> f.getPokemon()).collect(Collectors.toList());
     }
 
-    public void transferPokemon(Player player, Pokemon pokemon) {
+    public synchronized void transferPokemon(Player player, Pokemon pokemon) {
        if(storage.stream().noneMatch(entry -> entry.getPokemon().equals(pokemon))) {
            throw new IllegalArgumentException();
        } else {
@@ -29,7 +23,7 @@ public class PokeStore {
        }
     }
 
-    public double catchRate(List<CatchEntry> catches) {
+    public synchronized double catchRate(List<CatchEntry> catches) {
         Comparator<CatchEntry> comp = (c1, c2) -> {
             if(c1.getCatchTime().before(c2.getCatchTime())) return -1;
             if(c1.getCatchTime().after(c2.getCatchTime())) return 1;

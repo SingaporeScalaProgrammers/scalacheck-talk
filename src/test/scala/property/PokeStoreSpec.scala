@@ -36,7 +36,7 @@ class PokeStoreSpec
     }
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
-      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2))
+      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2, maxParComb = 10000))
     }
 
   }
