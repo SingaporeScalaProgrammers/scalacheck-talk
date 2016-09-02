@@ -3,14 +3,14 @@ package property
 import java.util.Date
 
 import models.{CatchEntry, Player, PokeStore, Pokemon}
-import org.scalacheck.{Gen, Prop}
 import org.scalacheck.Arbitrary._
 import org.scalacheck.commands.Commands
-import org.scalatest.{MustMatchers, WordSpecLike}
+import org.scalacheck.{Gen, Prop}
 import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
+import org.scalatest.{MustMatchers, WordSpecLike}
 import utils.GeneratorHelpers
 
-import collection.JavaConversions._
+import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
 
 class PokeStoreSpec
@@ -20,20 +20,8 @@ class PokeStoreSpec
     with GeneratorHelpers
     with GeneratorDrivenPropertyChecks {
 
-  "PokeStore" should {
-    //1st edge case the empty list
-    "catch rate should be > 0 if list is non empty" in {
-      forAll(Gen.listOfN(2,catches)){
-        (catches : List[CatchEntry]) => {
-          val store = new PokeStore()
-          if(catches.isEmpty || catches.size == 1) { //fixes for bug #1 and bug#2
-            assert(store.catchRate(catches) == 0.0)
-          }
-          else assert(store.catchRate(catches) > 0) //bug #3 is that a catch rate of 0.0 is returned when you catch 2 pokemon on the same day
-        }
-      }
 
-    }
+  "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
       check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2))
@@ -115,7 +103,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
     override def postCondition(state: State, result: Try[Result]): Prop =
       result.isSuccess && (
         result.get.size == state.size &&
-        result.get.forall(p => state.exists(_._1 == p))
+          result.get.forall(p => state.exists(_._1 == p))
         )
   }
 
@@ -136,7 +124,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
     override def preCondition(state: State): Boolean = true
 
-    override def postCondition(state:State, result: Try[Result]): Prop = result match {
+    override def postCondition(state: State, result: Try[Result]): Prop = result match {
       case Success(_) => state.exists(_._1 == pokemon)
       case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.exists(_._1 == pokemon)
     }
