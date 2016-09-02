@@ -18,9 +18,6 @@ trait GeneratorHelpers {
       pType <- shortString
     } yield new Pokemon(id, name, pType)
 
-  implicit def arbPokemon = Arbitrary(
-    pokemon
-  )
 
   val catches = for{
     time <- Gen.posNum[Long]

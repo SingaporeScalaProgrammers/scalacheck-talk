@@ -23,15 +23,14 @@ class PokeStoreSpec
 
   "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
-      val testPlayer = new Player(1)
-      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2, maxParComb = 10000))
+      check(new SinglePlayerPokeStoreSpec().property(threadCount = 2, maxParComb = 10000))
     }
 
   }
 
 }
 
-class SinglePlayerPokeStoreSpec(player: Player)
+class SinglePlayerPokeStoreSpec()
   extends Commands
     with GeneratorHelpers {
 
@@ -57,7 +56,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
   def arbitraryStore = {
     for {
-      poke <- arbitrary[Pokemon]
+      poke <- pokemon
       time <- arbitrary[Date]
     } yield Store(poke, time)
   }
@@ -65,7 +64,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
   def arbitraryTransfer(state: State): Gen[Transfer] = {
     Gen.oneOf(
       Gen.oneOf(state).map(e => Transfer(e._1)),
-      arbitrary[Pokemon].filter(p => !state.contains(p)).map(Transfer)
+      pokemon.filter(p => !state.contains(p)).map(Transfer)
     )
   }
 
@@ -84,7 +83,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
     override def preCondition(state: State): Boolean = true
 
-    override def run(sut: PokeStore): Result = sut.listPokemon(player).toList
+    override def run(sut: PokeStore): Result = sut.listPokemon().toList
 
     override def nextState(state: State): State = state
 
@@ -104,7 +103,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
     override def postCondition(state: State, result: Try[Result]): Prop = result.isSuccess
 
-    override def run(sut: PokeStore): Result = sut.storePokemon(player, pokemon, time)
+    override def run(sut: PokeStore): Result = sut.storePokemon(pokemon, time)
 
     override def nextState(state: State): State = (pokemon, time) :: state
   }
@@ -119,7 +118,7 @@ class SinglePlayerPokeStoreSpec(player: Player)
       case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.exists(_._1 == pokemon)
     }
 
-    override def run(sut: PokeStore): Result = sut.transferPokemon(player, pokemon)
+    override def run(sut: PokeStore): Result = sut.transferPokemon(pokemon)
 
     override def nextState(state: State): State = state.filterNot(_._1 == pokemon)
   }
