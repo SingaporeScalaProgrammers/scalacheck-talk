@@ -24,7 +24,7 @@ class PokeStoreSpec
   "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
       val testPlayer = new Player(1)
-      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2))
+      check(new SinglePlayerPokeStoreSpec(testPlayer).property(threadCount = 2, maxParComb = 10000))
     }
 
   }
@@ -49,20 +49,10 @@ class SinglePlayerPokeStoreSpec(player: Player)
 
   override def genInitialState: Gen[State] = {
     Gen.const(List.empty)
-    /*Gen.listOf(
-      for {
-        poke <- arbitrary[Pokemon]
-        time <- arbitrary[Date]
-      } yield (poke, time)
-    )*/
   }
 
   override def newSut(state: State): Sut = {
-    val sut = new PokeStore()
-
-    //state.foreach(entry => sut.storePokemon(player, entry._1, entry._2))
-
-    sut
+    new PokeStore()
   }
 
   def arbitraryStore = {

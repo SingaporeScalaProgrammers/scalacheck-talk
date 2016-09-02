@@ -17,11 +17,11 @@ public class PokeStore {
         storage.add(new CatchEntry(pokemon, catchTime));
     }
 
-    public List<Pokemon> listPokemon(Player player) {
+    public synchronized List<Pokemon> listPokemon(Player player) {
         return storage.stream().map(f -> f.getPokemon()).collect(Collectors.toList());
     }
 
-    public void transferPokemon(Player player, Pokemon pokemon) {
+    public synchronized void transferPokemon(Player player, Pokemon pokemon) {
        if(storage.stream().noneMatch(entry -> entry.getPokemon().equals(pokemon))) {
            throw new IllegalArgumentException();
        } else {

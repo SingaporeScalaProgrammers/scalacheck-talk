@@ -9,11 +9,13 @@ import org.scalacheck.Arbitrary._
 
 trait GeneratorHelpers {
 
+  def shortString: Gen[String] = arbitrary[String].map(_.take(6))
+
   implicit lazy val pokemon =
     for {
       id <- arbitrary[Int]
-      name <- arbitrary[String]
-      pType <- arbitrary[String]
+      name <- shortString
+      pType <- shortString
     } yield new Pokemon(id, name, pType)
 
   implicit def arbPokemon = Arbitrary(
