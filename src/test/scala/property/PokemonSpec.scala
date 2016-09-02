@@ -6,9 +6,9 @@ import org.scalacheck.Arbitrary._
 import org.scalacheck.Gen
 import org.scalatest.WordSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import utils.GeneratorHelpers
+import utils.PokemonGenerators
 
-class PokemonSpec extends WordSpec with GeneratorDrivenPropertyChecks with GeneratorHelpers {
+class PokemonSpec extends WordSpec with GeneratorDrivenPropertyChecks with PokemonGenerators {
 
 
   def sameOrDifferent[T](implicit ev: Arbitrary[T]) = for {

@@ -8,7 +8,7 @@ import org.scalacheck.commands.Commands
 import org.scalacheck.{Gen, Prop}
 import org.scalatest.prop.{Checkers, GeneratorDrivenPropertyChecks}
 import org.scalatest.{MustMatchers, WordSpecLike}
-import utils.GeneratorHelpers
+import utils.PokemonGenerators
 
 import scala.collection.JavaConversions._
 import scala.util.{Failure, Success, Try}
@@ -17,7 +17,7 @@ class PokeStoreSpec
   extends WordSpecLike
     with MustMatchers
     with Checkers
-    with GeneratorHelpers
+    with PokemonGenerators
     with GeneratorDrivenPropertyChecks {
 
 
@@ -32,7 +32,7 @@ class PokeStoreSpec
 
 class SinglePlayerPokeStoreSpec()
   extends Commands
-    with GeneratorHelpers {
+    with PokemonGenerators {
 
   override type State = List[(Pokemon, Date)]
 

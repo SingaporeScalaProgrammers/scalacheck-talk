@@ -7,7 +7,7 @@ import org.scalacheck.{Arbitrary, Gen}
 import org.scalacheck.Arbitrary._
 
 
-trait GeneratorHelpers {
+trait PokemonGenerators {
 
   def shortString: Gen[String] = arbitrary[String].map(_.take(6))
 

@@ -4,10 +4,10 @@ import models.{CatchEntry, PokeUtils}
 import org.scalacheck.Gen
 import org.scalatest.WordSpec
 import org.scalatest.prop.GeneratorDrivenPropertyChecks
-import utils.GeneratorHelpers
+import utils.PokemonGenerators
 import scala.collection.JavaConversions._
 
-class PokeUtilsSpec extends WordSpec with GeneratorDrivenPropertyChecks with GeneratorHelpers{
+class PokeUtilsSpec extends WordSpec with GeneratorDrivenPropertyChecks with PokemonGenerators{
   "PokeUtils" should {
     //1st edge case the empty list
     "catch rate should be >= 0" in {
