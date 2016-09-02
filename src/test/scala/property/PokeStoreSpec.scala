@@ -34,7 +34,7 @@ class SinglePlayerPokeStoreSpec()
   extends Commands
     with PokemonGenerators {
 
-  override type State = List[(Pokemon, Date)]
+  override type State = List[Pokemon]
 
   override def destroySut(sut: Sut): Unit = () //sut.clearAll()
 
@@ -63,7 +63,7 @@ class SinglePlayerPokeStoreSpec()
 
   def arbitraryTransfer(state: State): Gen[Transfer] = {
     Gen.oneOf(
-      Gen.oneOf(state).map(e => Transfer(e._1)),
+      Gen.oneOf(state).map(e => Transfer(e)),
       pokemon.filter(p => !state.contains(p)).map(Transfer)
     )
   }
@@ -92,7 +92,7 @@ class SinglePlayerPokeStoreSpec()
     override def postCondition(state: State, result: Try[Result]): Prop =
       result.isSuccess && (
         result.get.size == state.size &&
-          result.get.forall(p => state.exists(_._1 == p))
+        result.get.forall(p => state.exists(_ == p))
         )
   }
 
@@ -105,7 +105,7 @@ class SinglePlayerPokeStoreSpec()
 
     override def run(sut: PokeStore): Result = sut.storePokemon(pokemon, time)
 
-    override def nextState(state: State): State = (pokemon, time) :: state
+    override def nextState(state: State): State = pokemon :: state
   }
 
   case class Transfer(pokemon: Pokemon) extends Command {
@@ -113,14 +113,14 @@ class SinglePlayerPokeStoreSpec()
 
     override def preCondition(state: State): Boolean = true
 
-    override def postCondition(state: State, result: Try[Result]): Prop = result match {
-      case Success(_) => state.exists(_._1 == pokemon)
-      case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.exists(_._1 == pokemon)
+    override def postCondition(state:State, result: Try[Result]): Prop = result match {
+      case Success(_) => state.contains(pokemon)
+      case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.contains(pokemon)
     }
 
     override def run(sut: PokeStore): Result = sut.transferPokemon(pokemon)
 
-    override def nextState(state: State): State = state.filterNot(_._1 == pokemon)
+    override def nextState(state: State): State = state.filterNot(_ == pokemon)
   }
 
 }
