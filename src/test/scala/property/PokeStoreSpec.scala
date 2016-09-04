@@ -59,10 +59,10 @@ class SinglePlayerPokeStoreSpec()
     } yield Store(poke, time)
   }
 
-  def arbitraryTransfer(state: State): Gen[Transfer] = {
+  def arbitraryDelete(state: State): Gen[Delete] = {
     Gen.oneOf(
-      Gen.oneOf(state).map(e => Transfer(e)),
-      pokemon.filter(p => !state.contains(p)).map(Transfer)
+      Gen.oneOf(state).map(e => Delete(e)),
+      pokemon.filter(p => !state.contains(p)).map(Delete)
     )
   }
 
@@ -70,7 +70,7 @@ class SinglePlayerPokeStoreSpec()
     Gen.oneOf(
       Gen.const(ListPokemon),
       arbitraryStore,
-      arbitraryTransfer(state)
+      arbitraryDelete(state)
     )
   }
 
@@ -78,19 +78,18 @@ class SinglePlayerPokeStoreSpec()
 
 
   case object ListPokemon extends Command {
+    override type Result = List[Pokemon]
 
     override def preCondition(state: State): Boolean = true
 
-    override def run(sut: PokeStore): Result = sut.listPokemon().toList
+    override def run(pokeStore: PokeStore): Result = pokeStore.listPokemon.toList
 
     override def nextState(state: State): State = state
-
-    override type Result = List[Pokemon]
 
     override def postCondition(state: State, result: Try[Result]): Prop =
       result.isSuccess && (
         result.get.size == state.size &&
-        result.get.forall(p => state.exists(_ == p))
+        result.get.forall(p => state.contains(p))
         )
   }
 
@@ -103,12 +102,12 @@ class SinglePlayerPokeStoreSpec()
       result.isSuccess && nextState(state).contains(pokemon)
     }
 
-    override def run(sut: PokeStore): Result = sut.storePokemon(pokemon, time)
+    override def run(pokeStore: PokeStore): Result = pokeStore.storePokemon(pokemon, time)
 
     override def nextState(state: State): State = pokemon :: state
   }
 
-  case class Transfer(pokemon: Pokemon) extends Command {
+  case class Delete(pokemon: Pokemon) extends Command {
     override type Result = Unit
 
     override def preCondition(state: State): Boolean = true
@@ -118,7 +117,7 @@ class SinglePlayerPokeStoreSpec()
       case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.contains(pokemon)
     }
 
-    override def run(sut: PokeStore): Result = sut.transferPokemon(pokemon)
+    override def run(sut: PokeStore): Result = sut.deletePokemon(pokemon)
 
     override def nextState(state: State): State = state.filterNot(_ == pokemon)
   }

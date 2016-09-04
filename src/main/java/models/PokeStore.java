@@ -21,7 +21,7 @@ public class PokeStore {
         return storage.stream().map(f -> f.getPokemon()).collect(Collectors.toList());
     }
 
-    public synchronized void transferPokemon( Pokemon pokemon) {
+    public synchronized void deletePokemon(Pokemon pokemon) {
        if(storage.stream().noneMatch(entry -> entry.getPokemon().equals(pokemon))) {
            throw new IllegalArgumentException();
        } else {
