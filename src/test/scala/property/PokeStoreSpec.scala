@@ -20,12 +20,10 @@ class PokeStoreSpec
     with PokemonGenerators
     with GeneratorDrivenPropertyChecks {
 
-
   "PokeStore" should {
     "support store, list, transfer of pokemons for a player" in {
       check(new SinglePlayerPokeStoreSpec().property(threadCount = 2, maxParComb = 10000))
     }
-
   }
 
 }
