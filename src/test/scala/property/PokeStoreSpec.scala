@@ -99,7 +99,7 @@ class SinglePlayerPokeStoreSpec()
     override def preCondition(state: State): Boolean = true
 
     override def postCondition(state: State, result: Try[Result]): Prop = {
-      result.isSuccess && nextState(state).contains(pokemon)
+      result.isSuccess
     }
 
     override def run(pokeStore: PokeStore): Result = pokeStore.storePokemon(pokemon, time)
@@ -113,7 +113,7 @@ class SinglePlayerPokeStoreSpec()
     override def preCondition(state: State): Boolean = true
 
     override def postCondition(state:State, result: Try[Result]): Prop = result match {
-      case Success(_) => state.contains(pokemon) && !nextState(state).contains(pokemon)
+      case Success(_) => state.contains(pokemon)
       case Failure(ex) => ex.isInstanceOf[IllegalArgumentException] && !state.contains(pokemon)
     }
 
