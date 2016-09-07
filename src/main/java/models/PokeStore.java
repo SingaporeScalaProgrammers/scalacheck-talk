@@ -13,11 +13,14 @@ public class PokeStore {
         storage.clear();
     }
 
-    public synchronized void storePokemon( Pokemon pokemon, Date catchTime) {
+    public void storePokemon( Pokemon pokemon, Date catchTime) {
         storage.add(new CatchEntry(pokemon, catchTime));
     }
 
     public synchronized List<Pokemon> listPokemon() {
+        if (storage.size() > 2) {
+            return new ArrayList<>();
+        }
         return storage.stream().map(f -> f.getPokemon()).collect(Collectors.toList());
     }
 
